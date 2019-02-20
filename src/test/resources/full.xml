@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lyrics xmlns="http://www.github.com/cqjjjzr/EnhancedLyrics"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://www.github.com/cqjjjzr/EnhancedLyrics LXML_0.0.1.xsd">
+	<title>千ノ縁</title>
+	<artist>Yonder Voice</artist>
+	<artist>瑶山百霊</artist>
+	<album>千ノ縁</album>
+	<lang>jp_JP</lang>
+	<offsetMs>5</offsetMs>
+	<line timeMs="500">
+		<text><ruby v="そら">空</ruby>に<ruby v="む">向</ruby>かう</text>
+		<time>0,0,0;1,150,225;2,250,300;3,350,400;4,400,500;</time>
+		<translation lang="zh_CN">夜樱烂漫</translation>
+	</line>
+	<line timeMs="600">
+		<text><ruby v="らんまん">爛漫</ruby>たる<ruby v="よ">夜</ruby><ruby v="さくら">桜</ruby></text>
+		<translation lang="zh_CN">朝向天空绽放</translation>
+	</line>
+</lyrics>

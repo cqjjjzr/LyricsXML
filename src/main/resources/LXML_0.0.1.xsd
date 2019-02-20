@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+targetNamespace="http://www.github.com/cqjjjzr/EnhancedLyrics"
+xmlns="http://www.github.com/cqjjjzr/EnhancedLyrics"
+elementFormDefault="qualified">
+	<xs:element name="lyrics">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="title" type="xs:string" minOccurs="0"/>
+				<xs:element name="artist" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+				<xs:element name="album" type="xs:string" minOccurs="0"/>
+				<xs:element name="lang" type="xs:string" minOccurs="0"/>
+				<xs:element name="offsetMs" type="xs:integer" minOccurs="0"/>
+
+				<xs:element name="line" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:all>
+							<xs:element name="text" type="richText" />
+							<xs:element name="translation" minOccurs="0">
+								<xs:complexType>
+									<xs:complexContent>
+										<xs:extension base="richText">
+											<xs:attribute name="lang" type="xs:string" />
+										</xs:extension>     
+									</xs:complexContent>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="time" minOccurs="0">
+								<xs:simpleType>
+									<xs:restriction base="xs:string">
+										<xs:pattern value="(\d+,\d+,\d+;)*"/>
+									</xs:restriction>
+								</xs:simpleType>
+							</xs:element>
+						</xs:all>
+						<xs:attribute name="timeMs" use="required">
+							<xs:simpleType>
+								<xs:restriction base="xs:integer">
+									<xs:minInclusive value="0"/>
+								</xs:restriction>
+							</xs:simpleType>
+						</xs:attribute>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<xs:complexType name="richText" mixed="true">
+		<xs:choice minOccurs="0" maxOccurs="unbounded">
+			<xs:element name="ruby">
+				<xs:complexType>
+					<xs:simpleContent>
+						<xs:extension base="xs:string">
+							<xs:attribute name="v" type="xs:string" />
+						</xs:extension>     
+					</xs:simpleContent>
+				</xs:complexType>
+			</xs:element>
+		</xs:choice>
+	</xs:complexType>
+</xs:schema>
