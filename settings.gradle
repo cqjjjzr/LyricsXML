@@ -1,2 +1,2 @@
 rootProject.name = 'LyricsXML'
-
+include 'LyricsXMLStudio'

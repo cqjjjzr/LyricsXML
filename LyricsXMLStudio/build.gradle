@@ -1,0 +1,13 @@
+plugins {
+    id 'java'
+    id 'org.jetbrains.kotlin.jvm'
+}
+
+group = "com.github.cqjjjzr"
+version = "0.0.1"
+
+dependencies {
+    compile project(':')
+    implementation group: 'no.tornado', name: 'tornadofx', version: '1.7.18'
+
+}
