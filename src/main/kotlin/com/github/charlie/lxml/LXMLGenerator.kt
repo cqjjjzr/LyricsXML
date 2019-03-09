@@ -4,16 +4,25 @@ import org.dom4j.Document
 import org.dom4j.DocumentHelper
 import org.dom4j.Element
 import org.dom4j.QName
+import org.dom4j.io.OutputFormat
 import org.dom4j.io.XMLWriter
 import java.io.StringWriter
+import java.io.Writer
 import javax.xml.XMLConstants
 
-const val LXMLNamespaceURI = "http://www.github.com/cqjjjzr/EnhancedLyrics"
+const val LXMLNamespaceURI = "http://www.github.com/cqjjjzr/LyricsXML"
 class LXMLGenerator {
-    fun generateString(lyrics: Lyrics): String {
+    fun generateStringUTF8(lyrics: Lyrics): String {
         return StringWriter().apply {
             XMLWriter(this).write(generate(lyrics))
         }.toString()
+    }
+
+    fun generateAndWrite(lyrics: Lyrics, writer: Writer, encoding: String = "UTF-8") {
+        XMLWriter(
+            writer,
+            OutputFormat.createCompactFormat().also { it.encoding = encoding })
+            .write(generate(lyrics))
     }
 
     fun generate(lyrics: Lyrics): Document {
@@ -29,8 +38,13 @@ class LXMLGenerator {
                 if (lyrics.language != null) addElement("lang").text = lyrics.language
                 if (lyrics.offsetMs != 0) addElement("offsetMs").text = lyrics.offsetMs.toString()
 
-                lyrics.lines.forEach {
-                    addElement("line").fillWithLyricLine(it)
+                addElement("lines").apply {
+                    lyrics.lines.forEach {
+                        when (it) {
+                            is LyricLine -> addElement("line").fillWithLyricLine(it)
+                            is SplitLine -> addElement("split").fillWithSplitLine(it)
+                        }
+                    }
                 }
             }
         }
@@ -47,6 +61,10 @@ class LXMLGenerator {
                 .addAttribute("lang", lang)
                 .fillWithRichText(text)
         }
+    }
+
+    private fun Element.fillWithSplitLine(line: SplitLine) {
+        addAttribute("timeMs", line.timeMs.toString())
     }
 
     private fun generateTimeInCharactersString(timeInCharacters: TimeInCharactersToken): String {

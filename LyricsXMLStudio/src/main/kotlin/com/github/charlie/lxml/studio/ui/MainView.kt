@@ -1,20 +1,20 @@
 package com.github.charlie.lxml.studio.ui
 
 import com.github.charlie.lxml.studio.FileSession
+import com.github.charlie.lxml.studio.exceptionAlert
+import com.github.charlie.lxml.studio.messageFormat
 import javafx.collections.ListChangeListener
 import javafx.scene.Parent
-import javafx.scene.control.Alert
-import javafx.scene.control.ButtonType
-import javafx.scene.control.MenuItem
-import javafx.scene.control.Tab
+import javafx.scene.control.*
+import javafx.scene.input.KeyCombination
 import javafx.stage.FileChooser
+import org.fxmisc.easybind.EasyBind
 import tornadofx.*
 import java.io.File
 
 class MainView: View() {
-    private val filterForLXML: Array<out FileChooser.ExtensionFilter>
-            = arrayOf(FileChooser.ExtensionFilter(messages["dialog.lxmlFilter"], "xml"))
     private val controller: MainController by inject()
+    private val lyricsView: LyricsView by inject()
     private val tabPane = tabpane {
         BindingUtil.mapContent(tabs, controller.sessions, ::createTab)
         tabs.addListener { change: ListChangeListener.Change<out Tab> ->
@@ -22,50 +22,50 @@ class MainView: View() {
             if (change.wasAdded())
                 change.addedSubList.last().select()
         }
+        tabClosingPolicy = TabPane.TabClosingPolicy.ALL_TABS
     }
     private val currentTab: Tab? get() = tabPane.selectionModel.selectedItem
-
     private val currentSession: FileSession? get() = currentTab?.userData as FileSession?
+
     override val root: Parent = borderpane {
         top = menubar {
             menu(messages["ui.file"]) {
-                item(messages["ui.file.new"]) {
-                    action {
+                item(messages["ui.file.new"], KeyCombination.keyCombination("Ctrl+N")) {
+                    actionWithCatching(messages["ui.exception.new"]) {
                         controller.newFile()
                     }
                 }
 
-                item(messages["ui.file.open"]) {
-                    action {
+                item(messages["ui.file.open"], KeyCombination.keyCombination("Ctrl+O")) {
+                    actionWithCatching(messages["ui.exception.open"]) {
                         val file = chooseFileForOpen()
-                        controller.open(file)
+                        if (file != null)
+                            controller.open(file)
                     }
                 }
 
-                item(messages["ui.file.save"]) {
+                item(messages["ui.file.save"], KeyCombination.keyCombination("Ctrl+S")) {
                     setupDisableOnNoTabOpened()
-                    action {
-                        val session = currentSession ?: return@action
+                    actionWithCatching(messages["ui.exception.save"]) {
+                        val session = currentSession ?: return@actionWithCatching
                         save(session)
                     }
                 }
 
-                item(messages["ui.file.saveAs"]) {
+                item(messages["ui.file.saveAs"], KeyCombination.keyCombination("Ctrl+Alt+S")) {
                     setupDisableOnNoTabOpened()
-                    action {
-                        val session = currentSession ?: return@action
+                    actionWithCatching(messages["ui.exception.save"]) {
+                        val session = currentSession ?: return@actionWithCatching
                         chooseFileForSave(session)?.let {
                             controller.saveAs(session, it)
                         }
                     }
                 }
-                item(messages["ui.file.close"]) {
+                item(messages["ui.file.close"], KeyCombination.keyCombination("Ctrl+W")) {
                     setupDisableOnNoTabOpened()
                     action {
                         val session = currentSession ?: return@action
-                        if (session.dirty) {
-
-                        }
+                        checkTabAndClose(session)
                     }
                 }
                 separator()
@@ -73,18 +73,32 @@ class MainView: View() {
                     action {
                         tabPane.tabs.forEach {
                             val session = it.userData as FileSession
-                            save(session)
+                            try {
+                                save(session)
+                            } catch (ex: Exception) {
+                                exceptionAlert(messages["ui.exception.save"].messageFormat(session.fileName), ex)
+                                return@action
+                            }
                         }
                     }
                 }
+
                 item(messages["ui.file.closeAll"]) {
                     setupDisableOnNoTabOpened()
                     action {
-
+                        tabPane.tabs.map { it.fileSession }.forEach {
+                            // be careful, here tabs is copied by "map" to avoid concurrent modification exception
+                            try {
+                                checkTabAndClose(it)
+                            } catch (ex: Exception) {
+                                exceptionAlert(messages["ui.exception.saveAndClose"].messageFormat(it.fileName), ex)
+                                return@action
+                            }
+                        }
                     }
                 }
                 separator()
-                item(messages["ui.file.exit"]) {
+                item(messages["ui.file.exit"], KeyCombination.keyCombination("Ctrl+Q")) {
                     action {
                         primaryStage.close()
                     }
@@ -92,34 +106,36 @@ class MainView: View() {
             }
         }
         center = tabPane
-        titleProperty.bind(tabPane.selectionModel.selectedItemProperty().stringBinding {
-            val fileName = if (it != null)
-                ((it.userData as FileSession).fileName ?: messages["ui.untitled"]) + " - "
-            else ""
-            "${fileName}LyricsXML v$Version"
-        })
+
+
+        titleProperty.bind(EasyBind.select(tabPane.selectionModel.selectedItemProperty()).selectObject { tab ->
+            tab?.fileSession?.fileProperty()?.stringBinding {
+                messages["ui.title.withFile"].messageFormat(Version, it?.path ?: messages["ui.untitled"])
+            }
+        }.orElse(messages["ui.title"].messageFormat(Version)))
 
         controller.test()
     }
 
+    // Controller-related helper functions
+
+    @Suppress("RedundantLambdaArrow") // "addListener" bug
     private fun createTab(fileSession: FileSession): Tab {
-        return Tab(fileSession.fileName ?: messages["ui.untitled"]).apply {
+        return Tab(fileSession.fileName).apply {
             this.userData = fileSession
-            textProperty().bind(fileSession.fileNameProperty().stringBinding {
-                it ?: messages["ui.untitled"]
+            textProperty().bind(fileSession.fileProperty().stringBinding {
+                it?.name ?: messages["ui.untitled"]
             })
             borderpane {
-                center = textarea(fileSession.lyrics.toString())
-                bottom = canvas(500.0, 300.0)
-            }
-            setOnCloseRequest {
-                if (fileSession.dirty) {
-                    when (askIfSave(fileSession)) {
-                        ButtonType.CANCEL -> it.consume()
-                        ButtonType.YES -> controller.saveAndCloseSession(fileSession)
-                        ButtonType.NO -> controller.closeSession(fileSession)
+                center = textarea(fileSession.lyrics.toString()) {
+                    textProperty().addListener { _ ->
+                        fileSession.dirty = true
                     }
                 }
+                bottom = lyricsView.root
+            }
+            setOnCloseRequest {
+                if (!checkTabAndClose(fileSession)) it.consume()
             }
         }
     }
@@ -130,7 +146,10 @@ class MainView: View() {
             filters = filterForLXML,
             mode = FileChooserMode.Save) {
             initialFileName = session.file?.path
-        }.firstOrNull()
+        }.firstOrNull()?.let {
+            if (it.extension.isEmpty()) File(it.path + ".xml")
+            else it
+        }
     }
 
     private fun chooseFileForOpen(): File? {
@@ -141,21 +160,24 @@ class MainView: View() {
         ).firstOrNull()
     }
 
-    private fun MenuItem.setupDisableOnNoTabOpened() {
-        enableWhen {
-            tabPane.selectionModel.selectedItemProperty().isNotNull
-        }
-        disableWhen {
-            tabPane.selectionModel.selectedItemProperty().isNull
-        }
+    private fun checkTabAndClose(fileSession: FileSession): Boolean {
+        if (fileSession.dirty) {
+            when (askIfSave(fileSession)) {
+                ButtonType.CANCEL -> return false
+                ButtonType.YES -> save(fileSession)
+                ButtonType.NO -> controller.closeSession(fileSession)
+            }
+        } else controller.closeSession(fileSession)
+        return true
     }
 
     private fun askIfSave(fileSession: FileSession): ButtonType {
+        val fileName = fileSession.fileName
         return alert(
             type = Alert.AlertType.WARNING,
-            header = "Closing ${fileSession.file?.path ?: "Untitled"}",
+            header = messages["dialog.saveOrNot.title"].messageFormat(fileName),
             title = "Save?",
-            content = "File ${fileSession.file?.path ?: "Untitled"} modified, save?",
+            content = messages["dialog.saveOrNot.content"].messageFormat(fileName),
             buttons = *arrayOf(ButtonType.YES, ButtonType.NO, ButtonType.CANCEL))
             .result
     }
@@ -166,5 +188,45 @@ class MainView: View() {
                 controller.saveAs(session, it)
             }
         else controller.save(session)
+    }
+
+    // Just GUI helpers
+
+    private fun MenuItem.setupDisableOnNoTabOpened() {
+        enableWhen {
+            tabPane.selectionModel.selectedItemProperty().isNotNull
+        }
+        disableWhen {
+            tabPane.selectionModel.selectedItemProperty().isNull
+        }
+    }
+
+    private val filterForLXML: Array<out FileChooser.ExtensionFilter>
+            = arrayOf(FileChooser.ExtensionFilter(messages["dialog.lxmlFilter"], "*.xml"))
+    private val Tab.fileSession get() = userData as FileSession
+    private val FileSession?.fileName get() = this?.file?.name ?: messages["ui.untitled"]
+    private inline fun MenuItem.actionWithCatching(message: String, crossinline block: () -> Unit) {
+        action {
+            try {
+                block()
+            } catch (ex: Exception) {
+                exceptionAlert(message, ex)
+            }
+        }
+    }
+
+    private inline fun catching(message: String, block: () -> Unit) {
+        try {
+            block()
+        } catch (ex: Exception) {
+            exceptionAlert(message, ex)
+        }
+    }
+    private inline fun catching(messageSupplier: () -> String, block: () -> Unit) {
+        try {
+            block()
+        } catch (ex: Exception) {
+            exceptionAlert(messageSupplier(), ex)
+        }
     }
 }

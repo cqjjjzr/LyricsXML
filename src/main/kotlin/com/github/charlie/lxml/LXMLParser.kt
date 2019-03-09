@@ -8,12 +8,14 @@ import org.jetbrains.annotations.Contract
 import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.InputStream
-import java.lang.IllegalArgumentException
 
 const val SchemaFileName = "LXML_0.0.1.xsd"
 const val SchemaResourceName = "/$SchemaFileName"
 private val validatorFactory = com.sun.msv.verifier.jarv.TheFactoryImpl()
-private val schema = validatorFactory.compileSchema(LXMLParser::class.java.getResourceAsStream(SchemaResourceName))
+private val schema =
+    validatorFactory.compileSchema(
+        LXMLParser::class.java.getResourceAsStream(SchemaResourceName)
+    )
 class LXMLParser {
     fun parse(xmlString: String) = parse(reader.read(ByteArrayInputStream(xmlString.toByteArray())))
     fun parse(file: File) = parse(reader.read(file))
@@ -30,21 +32,23 @@ class LXMLParser {
                 album =    root.elementText("album"),
                 offsetMs = root.elementText("offsetMs")?.toInt() ?: 0,
                 language = root.elementText("lang"),
-                lines =    root.elements("line").map { parseLine(it as Element) }.sorted()
+                lines =    root.element("lines").elements().map { parseLine(it as Element) }.sorted()
             )
         } catch (ex: Exception) {
             throw IllegalLXMLException("bad LXML exception", ex)
         }
-
     }
 
-    private fun parseLine(element: Element): LyricLine {
-        return LyricLine(
-            element.attributeValue("timeMs").toInt(),
-            parseRichLyricText(element.element("text")),
-            parseTimeInCharacters(element.elementText("time")),
-            parseTranslations(element.elements("translation"))
-        )
+    private fun parseLine(element: Element): Line {
+         return when (element.name) {
+             "line" -> LyricLine(
+                 element.attributeValue("timeMs").toInt(),
+                 parseRichLyricText(element.element("text")),
+                 parseTimeInCharacters(element.elementText("time")),
+                 parseTranslations(element.elements("translation"))
+             )
+             else -> SplitLine(element.attributeValue("timeMs").toInt())
+        }
     }
 
     @Contract("!null -> !null")

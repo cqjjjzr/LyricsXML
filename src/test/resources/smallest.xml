@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<lyrics xmlns="http://www.github.com/cqjjjzr/EnhancedLyrics"
+<lyrics xmlns="http://www.github.com/cqjjjzr/LyricsXML"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.github.com/cqjjjzr/EnhancedLyrics LXML_0.0.1.xsd">
-	<line timeMs="500">
-		<text>空に向かう</text>
-	</line>
+	<lines>
+		<line timeMs="500">
+			<text>空に向かう</text>
+		</line>
+	</lines>
 </lyrics>

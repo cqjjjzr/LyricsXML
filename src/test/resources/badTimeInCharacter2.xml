@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<lyrics xmlns="http://www.github.com/cqjjjzr/EnhancedLyrics"
+<lyrics xmlns="http://www.github.com/cqjjjzr/LyricsXML"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://www.github.com/cqjjjzr/EnhancedLyrics LXML_0.0.1.xsd">
 	<title>千ノ縁</title>
@@ -8,9 +8,11 @@
 	<album>千ノ縁</album>
 	<lang>jp_JP</lang>
 	<offsetMs>5</offsetMs>
-	<line timeMs="500">
-		<text><ruby v="そら">空</ruby>に<ruby v="む">向</ruby>かう</text>
-		<time>0,0,0;1,5,0;</time>
-		<translation lang="zh_CN">夜樱烂漫</translation>
-	</line>
+	<lines>
+		<line timeMs="500">
+			<text><ruby v="そら">空</ruby>に<ruby v="む">向</ruby>かう</text>
+			<time>0,0,0;1,5,0;</time>
+			<translation lang="zh_CN">夜樱烂漫</translation>
+		</line>
+	</lines>
 </lyrics>

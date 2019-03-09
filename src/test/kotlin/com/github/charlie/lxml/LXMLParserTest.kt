@@ -32,6 +32,7 @@ class LXMLParserTest {
                     TimeInCharacterEntry(4, 400, 500)
                 ),
                 mapOf("zh_CN" to listOf(PlainLyricToken("夜樱烂漫")))),
+            SplitLine(501),
             LyricLine(600,
                 listOf(
                     RubyLyricToken("爛漫", "らんまん"),
@@ -43,7 +44,7 @@ class LXMLParserTest {
         )
 
         assertEquals(expected, lyrics.lines)
-        val line = lyrics.lines.first()
+        val line = lyrics.lines.first() as LyricLine
         assertEquals("空に向かう", line.text.toPlainText())
     }
 
@@ -57,7 +58,7 @@ class LXMLParserTest {
         assertNull(lyrics.language)
 
         assertEquals(1, lyrics.lines.size, "number of lines should be 1")
-        val line = lyrics.lines.first()
+        val line = lyrics.lines.first() as LyricLine
         assertNull(line.timeInCharacters)
         assertEquals(0, line.translationTokensByLanguage.size, "number of translations should be 0")
         assertEquals("空に向かう", line.text.toPlainText())

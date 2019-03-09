@@ -1,5 +1,7 @@
 package com.github.charlie.lxml.studio.ui
 
+import com.github.charlie.lxml.LXMLGenerator
+import com.github.charlie.lxml.LXMLParser
 import com.github.charlie.lxml.studio.FileSession
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
@@ -8,13 +10,18 @@ import java.io.File
 
 class MainController: Controller() {
     fun test() {
-        sessions += FileSession(File("D:\\full.xml")).apply {
+        sessions += FileSession(File("E:\\full.xml")).apply {
             dirty = true
         }
     }
 
     fun save(fileSession: FileSession) {
-        fileSession.file = File("D:\\full.xml") // 迫真
+        //fileSession.file = File("D:\\full.xml") // 迫真
+        val file = fileSession.file ?: return
+        file.writer(Charsets.UTF_8).use {
+            generator.generateAndWrite(fileSession.lyrics, it)
+        }
+        fileSession.dirty = false
     }
 
     fun closeSession(fileSession: FileSession) {
@@ -22,7 +29,8 @@ class MainController: Controller() {
     }
 
     fun saveAs(session: FileSession, file: File) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        session.file = file
+        save(session)
     }
 
     fun saveAndCloseSession(fileSession: FileSession) {
@@ -34,9 +42,11 @@ class MainController: Controller() {
         sessions += FileSession(null)
     }
 
-    fun open(file: File?) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    fun open(file: File) {
+        sessions += FileSession(file)
     }
 
     val sessions: ObservableList<FileSession> = FXCollections.observableArrayList()
+    private val generator = LXMLGenerator()
+    private val parser = LXMLParser()
 }

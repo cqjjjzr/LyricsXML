@@ -6,17 +6,25 @@ data class Lyrics(
     val album: String?,
     val language: String?,
     val offsetMs: Int,
-    val lines: List<LyricLine>
+    val lines: List<Line>
 )
 
+interface Line: Comparable<Line> {
+    val timeMs: Int
+
+    override fun compareTo(other: Line): Int = timeMs.compareTo(other.timeMs)
+}
+
 data class LyricLine(
-    val timeMs: Int,
+    override val timeMs: Int,
     val text: RichLyricText,
     val timeInCharacters: TimeInCharactersToken?,
     val translationTokensByLanguage: Map<String, RichLyricText>
-): Comparable<LyricLine> {
-    override fun compareTo(other: LyricLine): Int = timeMs.compareTo(other.timeMs)
-}
+): Line
+
+data class SplitLine(
+    override val timeMs: Int
+): Line
 
 typealias TimeInCharactersToken = List<TimeInCharacterEntry>
 data class TimeInCharacterEntry (

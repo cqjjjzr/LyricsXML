@@ -6,8 +6,17 @@ plugins {
 group = "com.github.cqjjjzr"
 version = "0.0.1"
 
+sourceCompatibility = 1.8
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+}
+
 dependencies {
     compile project(':')
     implementation group: 'no.tornado', name: 'tornadofx', version: '1.7.18'
-
+    implementation group: 'org.fxmisc.easybind', name: 'easybind', version: '1.0.3'
+    implementation 'org.jfxtras:jmetro:5.2'
 }

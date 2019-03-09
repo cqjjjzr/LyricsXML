@@ -14,7 +14,7 @@ class LXMLGeneratorTest {
     fun test() {
         val xml = SAXReader().read(LXMLParserTest::class.java.getResourceAsStream("/full.xml"))
         val expected = StringWriter().apply { XMLWriter(this).write(xml) }.toString()
-        val actual = generator.generateString(parser.parse(xml))
+        val actual = generator.generateStringUTF8(parser.parse(xml))
         XmlAssert.assertThat(expected).and(actual).normalizeWhitespace().areIdentical()
     }
 }
