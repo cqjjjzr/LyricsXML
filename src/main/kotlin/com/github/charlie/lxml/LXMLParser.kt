@@ -74,18 +74,14 @@ class LXMLParser {
         if (elementText == null) return null
         return elementText
             .split(";")
-            .map { it.split(",", limit = 3) }
-            .filter { it.size == 3 }
+            .map { it.split(",", limit = 2) }
+            .filter { it.size == 2 }
             .map {
-                val start = it[1].toInt()
-                val end = it[2].toInt()
-                if (start > end)
-                    throw IllegalArgumentException("bad time token: start time > end time")
+                val end = it[1].toInt()
                 TimeInCharacterEntry(
                     it[0].toInt(),
-                    it[1].toInt(),
-                    it[2].toInt())
-            }
+                    end)
+            }.toSortedSet()
     }
 
     private fun parseTranslations(elements: List<Element>): Map<String, RichLyricText> {

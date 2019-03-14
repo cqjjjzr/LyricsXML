@@ -1,5 +1,7 @@
 package com.github.charlie.lxml
 
+import java.util.*
+
 data class Lyrics(
     val title: String?,
     val artist: List<String>,
@@ -26,12 +28,13 @@ data class SplitLine(
     override val timeMs: Int
 ): Line
 
-typealias TimeInCharactersToken = List<TimeInCharacterEntry>
+typealias TimeInCharactersToken = SortedSet<TimeInCharacterEntry>
 data class TimeInCharacterEntry (
     val pos: Int,
-    val startMs: Int,
     val endMs: Int
-)
+): Comparable<TimeInCharacterEntry> {
+    override fun compareTo(other: TimeInCharacterEntry): Int = endMs.compareTo(other.endMs)
+}
 
 interface LyricToken {
     val plainText: String

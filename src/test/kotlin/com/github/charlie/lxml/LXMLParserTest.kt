@@ -15,7 +15,7 @@ class LXMLParserTest {
         assertEquals("千ノ縁", lyrics.album)
         assertEquals(listOf("Yonder Voice", "瑶山百霊"), lyrics.artist)
         assertEquals(5, lyrics.offsetMs)
-        assertEquals("jp_JP", lyrics.language)
+        assertEquals("jp", lyrics.language)
 
         val expected = listOf(
             LyricLine(500,
@@ -24,14 +24,13 @@ class LXMLParserTest {
                     PlainLyricToken("に"),
                     RubyLyricToken("向", "む"),
                     PlainLyricToken("かう")),
-                listOf(
-                    TimeInCharacterEntry(0, 0, 0),
-                    TimeInCharacterEntry(1, 150, 225),
-                    TimeInCharacterEntry(2, 250, 300),
-                    TimeInCharacterEntry(3, 350, 400),
-                    TimeInCharacterEntry(4, 400, 500)
+                sortedSetOf(
+                    TimeInCharacterEntry(1, 150),
+                    TimeInCharacterEntry(2, 300),
+                    TimeInCharacterEntry(3, 400),
+                    TimeInCharacterEntry(4, 500)
                 ),
-                mapOf("zh_CN" to listOf(PlainLyricToken("夜樱烂漫")))),
+                mapOf("zh" to listOf(PlainLyricToken("夜樱烂漫")))),
             SplitLine(501),
             LyricLine(600,
                 listOf(
@@ -40,7 +39,7 @@ class LXMLParserTest {
                     RubyLyricToken("夜", "よ"),
                     RubyLyricToken("桜", "さくら")),
                 null,
-                mapOf("zh_CN" to listOf(PlainLyricToken("朝向天空绽放"))))
+                mapOf("zh" to listOf(PlainLyricToken("朝向天空绽放"))))
         )
 
         assertEquals(expected, lyrics.lines)
@@ -75,7 +74,6 @@ class LXMLParserTest {
     fun testBad() {
         assertThrows<IllegalLXMLException> { parseWithResource("/missingText.xml") }
         assertThrows<IllegalLXMLException> { parseWithResource("/badTimeInCharacter.xml") }
-        assertThrows<IllegalLXMLException> { parseWithResource("/badTimeInCharacter2.xml") }
     }
 
         private fun parseWithResource(name: String)

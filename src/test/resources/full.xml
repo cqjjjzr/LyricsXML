@@ -6,18 +6,18 @@
 	<artist>Yonder Voice</artist>
 	<artist>瑶山百霊</artist>
 	<album>千ノ縁</album>
-	<lang>jp_JP</lang>
+	<lang>jp</lang>
 	<offsetMs>5</offsetMs>
 	<lines>
 		<line timeMs="500">
 			<text><ruby v="そら">空</ruby>に<ruby v="む">向</ruby>かう</text>
-			<time>0,0,0;1,150,225;2,250,300;3,350,400;4,400,500;</time>
-			<translation lang="zh_CN">夜樱烂漫</translation>
+			<time>1,150;2,300;3,400;4,500;6,700;</time>
+			<translation lang="zh">夜樱烂漫</translation>
 		</line>
 		<split timeMs="501"/>
 		<line timeMs="600">
 			<text><ruby v="らんまん">爛漫</ruby>たる<ruby v="よ">夜</ruby><ruby v="さくら">桜</ruby></text>
-			<translation lang="zh_CN">朝向天空绽放</translation>
+			<translation lang="zh">朝向天空绽放</translation>
 		</line>
 	</lines>
 </lyrics>

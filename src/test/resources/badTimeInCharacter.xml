@@ -6,13 +6,13 @@
 	<artist>Yonder Voice</artist>
 	<artist>瑶山百霊</artist>
 	<album>千ノ縁</album>
-	<lang>jp_JP</lang>
+	<lang>jp</lang>
 	<offsetMs>5</offsetMs>
 	<lines>
 		<line timeMs="500">
 			<text><ruby v="そら">空</ruby>に<ruby v="む">向</ruby>かう</text>
 			<time>aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</time>
-			<translation lang="zh_CN">夜樱烂漫</translation>
+			<translation lang="zh">夜樱烂漫</translation>
 		</line>
 	</lines>
 </lyrics>

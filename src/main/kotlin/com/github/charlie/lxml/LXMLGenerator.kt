@@ -72,8 +72,6 @@ class LXMLGenerator {
             timeInCharacters.forEach {
                 append(it.pos)
                 append(',')
-                append(it.startMs)
-                append(',')
                 append(it.endMs)
                 append(';')
             }

@@ -21,4 +21,5 @@ class FileSession(file: File?) {
     val lyrics: Lyrics =
         if (file != null) LXMLParser().parse(file)
         else Lyrics(null, emptyList(), null, null, 0, emptyList())
+    val previewStatus = LyricsPreviewStatus(lyrics.lines.firstOrNull())
 }

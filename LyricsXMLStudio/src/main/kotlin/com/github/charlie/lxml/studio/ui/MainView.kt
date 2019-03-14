@@ -4,9 +4,11 @@ import com.github.charlie.lxml.studio.FileSession
 import com.github.charlie.lxml.studio.exceptionAlert
 import com.github.charlie.lxml.studio.messageFormat
 import javafx.collections.ListChangeListener
+import javafx.geometry.Orientation
 import javafx.scene.Parent
 import javafx.scene.control.*
 import javafx.scene.input.KeyCombination
+import javafx.scene.layout.Priority
 import javafx.stage.FileChooser
 import org.fxmisc.easybind.EasyBind
 import tornadofx.*
@@ -14,7 +16,6 @@ import java.io.File
 
 class MainView: View() {
     private val controller: MainController by inject()
-    private val lyricsView: LyricsView by inject()
     private val tabPane = tabpane {
         BindingUtil.mapContent(tabs, controller.sessions, ::createTab)
         tabs.addListener { change: ListChangeListener.Change<out Tab> ->
@@ -123,19 +124,30 @@ class MainView: View() {
     private fun createTab(fileSession: FileSession): Tab {
         return Tab(fileSession.fileName).apply {
             this.userData = fileSession
+            val lyricsView = find<LyricsView>(mapOf(LyricsView::status to fileSession.previewStatus))
+            this.properties["lyricsView"] = lyricsView
+
             textProperty().bind(fileSession.fileProperty().stringBinding {
                 it?.name ?: messages["ui.untitled"]
             })
-            borderpane {
-                center = textarea(fileSession.lyrics.toString()) {
+            splitpane(Orientation.VERTICAL,
+                textarea(fileSession.lyrics.toString()) {
                     textProperty().addListener { _ ->
                         fileSession.dirty = true
                     }
-                }
-                bottom = lyricsView.root
+                },
+                lyricsView.root) {
+                vgrow = Priority.ALWAYS
+                hgrow = Priority.ALWAYS
+                setDividerPosition(0, 0.7)
+                SplitPane.setResizableWithParent(lyricsView.root, false)
+
+                fileSession.previewStatus.line = fileSession.lyrics.lines[0]
+                fileSession.previewStatus.localTimeMs = 450
             }
             setOnCloseRequest {
-                if (!checkTabAndClose(fileSession)) it.consume()
+                checkTabAndClose(fileSession)
+                it.consume()
             }
         }
     }

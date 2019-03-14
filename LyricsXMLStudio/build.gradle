@@ -19,4 +19,5 @@ dependencies {
     implementation group: 'no.tornado', name: 'tornadofx', version: '1.7.18'
     implementation group: 'org.fxmisc.easybind', name: 'easybind', version: '1.0.3'
     implementation 'org.jfxtras:jmetro:5.2'
+    implementation 'org.jfree:fxgraphics2d:1.8'
 }
